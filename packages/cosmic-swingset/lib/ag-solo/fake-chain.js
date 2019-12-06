@@ -26,8 +26,8 @@ async function writeMap(file, map) {
 }
 
 export async function connectToFakeChain(basedir, GCI, role, delay, inbound) {
-  const stateFile = path.join(basedir, 'fake-chain-state.json');
-  const mailboxFile = path.join(basedir, 'fake-mailbox.json');
+  const stateFile = path.join(basedir, `fake-chain-${GCI}-state.json`);
+  const mailboxFile = path.join(basedir, `fake-chain-${GCI}-mailbox.json`);
   const bootAddress = `${GCI}-client`;
 
   const mailboxStorage = await readMap(mailboxFile);
