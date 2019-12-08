@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import path from 'path';
 import fs from 'fs';
 import stringify from '@agoric/swingset-vat/src/kernel/json-stable-stringify';
@@ -39,17 +40,20 @@ export async function connectToFakeChain(basedir, GCI, role, delay, inbound) {
 
   let pretendLast = Date.now();
   let blockHeight = 0;
-  let queue = [];
+  let intoChain = [];
+  let thisBlock = [];
   async function simulateBlock() {
     const actualStart = Date.now();
-    const snapshot = queue;
+    // Gather up the new messages into the latest block.
+    thisBlock.push(...intoChain);
+    intoChain = [];
+
     try {
       const commitStamp = pretendLast + PRETEND_BLOCK_DELAY * 1000;
       const blockTime = Math.floor(commitStamp / 1000);
       await deliverStartBlock(blockHeight, blockTime);
-      while (snapshot.length) {
-        const [newMessages, acknum] = snapshot.shift();
-        // eslint-disable-next-line no-await-in-loop
+      for (let i = 0; i < thisBlock.length; i += 1) {
+        const [newMessages, acknum] = thisBlock[i];
         await deliverInbound(
           bootAddress,
           newMessages,
@@ -61,8 +65,7 @@ export async function connectToFakeChain(basedir, GCI, role, delay, inbound) {
 
       // Done processing, "commit the block".
       await writeMap(mailboxFile, mailboxStorage);
-
-      queue = [];
+      thisBlock = [];
       pretendLast = commitStamp + Date.now() - actualStart;
       blockHeight += 1;
     } catch (e) {
@@ -83,7 +86,7 @@ export async function connectToFakeChain(basedir, GCI, role, delay, inbound) {
   }
 
   async function deliver(newMessages, acknum) {
-    queue.push([newMessages, acknum]);
+    intoChain.push([newMessages, acknum]);
     if (!delay) {
       await simulateBlock();
     }
