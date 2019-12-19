@@ -47,7 +47,7 @@ function isOfferSafeForOffer(unitOpsArray, payoutRules, units) {
     if (payoutRule.kind === 'offerAtMost') {
       return unitOpsArray[i].includes(units[i], payoutRule.units);
     }
-    // If the kind is 'want', anything we give back is fine for a refund.
+    // If the kind is 'wantAtLeast', anything we give back is fine for a refund.
     return true;
   });
 

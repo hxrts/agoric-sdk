@@ -63,7 +63,7 @@ test('isOfferSafeForOffer - gets want exactly', t => {
   }
 });
 
-// The player gets exactly what they wanted, with no 'offer'
+// The player gets exactly what they wanted, with no 'offerAtMost'
 test('isOfferSafeForOffer - gets wantAtLeast', t => {
   try {
     const { unitOps, moola, simoleans, bucks } = setup();
@@ -82,9 +82,9 @@ test('isOfferSafeForOffer - gets wantAtLeast', t => {
   }
 });
 
-// The player gets more than what they wanted, with no 'offer' rule
+// The player gets more than what they wanted, with no 'offerAtMost' rule
 // kind. Note: This returns 'true' counterintuitively because no
-// 'offer' rule kind was specified and none were given back, so the
+// 'offerAtMost' rule kind was specified and none were given back, so the
 // refund condition was fulfilled trivially.
 test('isOfferSafeForOffer - gets wantAtLeast', t => {
   try {
@@ -234,7 +234,7 @@ test('isOfferSafeForOffer - more than offerAtMost, no wants', t => {
   }
 });
 
-// The user gets refunded more than what they put in, with 'offer'
+// The user gets refunded more than what they put in, with 'offerAtMost'
 test('isOfferSafeForOffer - more than offer', t => {
   try {
     const { unitOps, moola, simoleans, bucks } = setup();

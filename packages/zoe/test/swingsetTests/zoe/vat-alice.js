@@ -1,6 +1,14 @@
 import harden from '@agoric/harden';
 
-const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
+const build = async (
+  E,
+  log,
+  zoe,
+  moolaPurseP,
+  simoleanPurseP,
+  installId,
+  timer,
+) => {
   const showPaymentBalance = async (paymentP, name) => {
     try {
       const units = await E(paymentP).getBalance();
@@ -18,9 +26,11 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
 
     const assays = harden([moolaAssay, simoleanAssay]);
 
-    const { instance: automaticRefund, instanceHandle } = await E(
-      zoe,
-    ).makeInstance(installId, { assays });
+    const invite = await E(zoe).makeInstance(installId, { assays });
+    const {
+      extent: { instanceHandle },
+    } = await E(invite).getBalance();
+    const { publicAPI } = await E(zoe).getInstance(instanceHandle);
 
     const offerRules = harden({
       payoutRules: [
@@ -40,15 +50,17 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
 
     const aliceMoolaPayment = await E(moolaPurseP).withdrawAll();
     const offerPayments = [aliceMoolaPayment, undefined];
-    const { escrowReceipt, payout: payoutP } = await E(zoe).escrow(
+    const { seat, payout: payoutP } = await E(zoe).redeem(
+      invite,
       offerRules,
       offerPayments,
     );
 
-    const outcome = await E(automaticRefund).makeOffer(escrowReceipt);
+    const outcome = await E(seat).makeOffer();
     log(outcome);
 
-    await E(bobP).doAutomaticRefund(instanceHandle);
+    const bobInvite = E(publicAPI).makeInvite();
+    await E(bobP).doAutomaticRefund(bobInvite);
     const payout = await payoutP;
 
     await E(moolaPurseP).depositAll(payout[0]);
@@ -64,9 +76,7 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
     const simoleanAssay = await E(simoleanPurseP).getAssay();
     const assays = harden([moolaAssay, simoleanAssay]);
 
-    const { instance: coveredCall, instanceHandle } = await E(
-      zoe,
-    ).makeInstance(installId, { assays });
+    const invite = await E(zoe).makeInstance(installId, { assays });
 
     const offerRules = harden({
       payoutRules: [
@@ -80,22 +90,22 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
         },
       ],
       exitRule: {
-        kind: 'onDemand',
+        kind: 'afterDeadline',
+        deadline: 1,
+        timer,
       },
     });
 
     const aliceMoolaPayment = await E(moolaPurseP).withdrawAll();
     const offerPayments = [aliceMoolaPayment, undefined];
-    const { escrowReceipt: aliceEscrowReceipt, payout: payoutP } = await E(
-      zoe,
-    ).escrow(offerRules, offerPayments);
-
-    const { outcome, invite } = await E(coveredCall).makeFirstOffer(
-      aliceEscrowReceipt,
+    const { seat, payout: payoutP } = await E(zoe).redeem(
+      invite,
+      offerRules,
+      offerPayments,
     );
-    log(outcome);
 
-    await E(bobP).doCoveredCall(invite, instanceHandle);
+    const option = await E(seat).makeCallOption();
+    await E(bobP).doCoveredCall(option);
     const payout = await payoutP;
 
     await E(moolaPurseP).depositAll(payout[0]);
@@ -111,9 +121,14 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
     const assays = harden([moolaAssay, simoleanAssay]);
 
     const numBidsAllowed = 3;
-    const { instance: auction, instanceHandle } = await E(
-      zoe,
-    ).makeInstance(installId, { assays, numBidsAllowed });
+    const invite = await E(zoe).makeInstance(installId, {
+      assays,
+      numBidsAllowed,
+    });
+    const {
+      extent: { instanceHandle },
+    } = await E(invite).getBalance();
+    const { publicAPI } = await E(zoe).getInstance(instanceHandle);
 
     const offerRules = harden({
       payoutRules: [
@@ -132,18 +147,20 @@ const build = async (E, log, zoe, moolaPurseP, simoleanPurseP, installId) => {
     });
     const moolaPayment = await E(moolaPurseP).withdrawAll();
     const offerPayments = [moolaPayment, undefined];
-    const { escrowReceipt, payout: payoutP } = await E(zoe).escrow(
+    const { seat, payout: payoutP } = await E(zoe).redeem(
+      invite,
       offerRules,
       offerPayments,
     );
 
-    const offerResult = await E(auction).startAuction(escrowReceipt);
+    const offerResult = await E(seat).sellAssets();
+    const [bobInvite, carolInvite, daveInvite] = await publicAPI.makeInvites(3);
 
     log(offerResult);
 
-    const bobDoneP = E(bobP).doPublicAuction(instanceHandle);
-    const carolDoneP = E(carolP).doPublicAuction(instanceHandle);
-    const daveDoneP = E(daveP).doPublicAuction(instanceHandle);
+    const bobDoneP = E(bobP).doPublicAuction(bobInvite);
+    const carolDoneP = E(carolP).doPublicAuction(carolInvite);
+    const daveDoneP = E(daveP).doPublicAuction(daveInvite);
 
     await Promise.all([bobDoneP, carolDoneP, daveDoneP]);
 

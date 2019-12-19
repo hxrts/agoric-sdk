@@ -28,14 +28,6 @@ interface Zoe {
   getInviteAssay() -> (Assay);
 
   /**
-   * Get the long-lived escrowReceiptAssay. The mint associated
-   * with the escrowReceiptAssay creates the ERTP payments that
-   * represent proof of escrow and may be passed into a
-   * smart contract method.
-   */
-  getEscrowReceiptAssay() -> (Assay);
-
-  /**
    * Returns the array of assays for the particular instance. This is 
    * helpful in the case that the user has forgotten the order.
    */
@@ -173,7 +165,4 @@ interface ZoeGoverningContractFacet () {
 
   /** Get the Zoe inviteAssay */
   getInviteAssay ( ) -> (Assay);
-
-  /** Get the Zoe escrowReceiptAssay */
-  getEscrowReceiptAssay ( ) -> (Assay);
 }

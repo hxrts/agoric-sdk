@@ -90,7 +90,7 @@ test('zoe - automaticRefund - valid inputs - no SES', async t => {
 const expectedCoveredCallOkLog = [
   '=> alice, bob, carol and dave are set up',
   '=> alice.doCreateCoveredCall called',
-  'The offer has been accepted. Once the contract has been completed, please check your payout',
+  '@@ schedule task for:1, currently: 0 @@',
   'The offer has been accepted. Once the contract has been completed, please check your payout',
   'bobMoolaPurse: balance {"label":{"assay":{},"allegedName":"moola"},"extent":3}',
   'bobSimoleanPurse;: balance {"label":{"assay":{},"allegedName":"simoleans"},"extent":0}',
