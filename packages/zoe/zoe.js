@@ -386,7 +386,6 @@ Unimplemented installation moduleFormat ${moduleFormat}`;
           payout: payoutMap.get(offerHandle).p,
         };
         const { exitRule } = offerRules;
-        debugger;
         // Automatically cancel on deadline.
         if (exitRule.kind === 'afterDeadline') {
           E(exitRule.timer).setWakeup(
