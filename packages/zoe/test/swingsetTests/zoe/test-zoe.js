@@ -251,7 +251,7 @@ const expectedSimpleExchangeOkLog = [
   'aliceMoolaPurse: balance {"label":{"assay":{},"allegedName":"moola"},"extent":0}',
   'aliceSimoleanPurse;: balance {"label":{"assay":{},"allegedName":"simoleans"},"extent":7}',
 ];
-test.skip('zoe - simpleExchange - valid inputs - with SES', async t => {
+test('zoe - simpleExchange - valid inputs - with SES', async t => {
   try {
     const startingExtents = [
       [3, 0],
@@ -270,7 +270,7 @@ test.skip('zoe - simpleExchange - valid inputs - with SES', async t => {
   }
 });
 
-test.skip('zoe - simpleExchange - valid inputs - no SES', async t => {
+test('zoe - simpleExchange - valid inputs - no SES', async t => {
   try {
     const startingExtents = [
       [3, 0],
